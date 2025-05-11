@@ -1,4 +1,4 @@
-import { pgTable,serial,text,varchar } from "drizzle-orm/pg-core";
+import { pgTable,serial,text,varchar,integer } from "drizzle-orm/pg-core";
 
 export const MockInterview=pgTable('MockInterview',{
   id:serial('id').primaryKey(),
@@ -22,3 +22,15 @@ export const UserAnswer=pgTable('userAnswer',{
   userEmail:varchar('userEmail'),
   createdAt:varchar('cretedAt')
 })
+
+
+
+export const CommonQuestions = pgTable('common_questions', {
+  id: serial('id').primaryKey(),
+  jobRole: varchar('jobRole').notNull(),
+  techStack: text('techStack').notNull(),
+  question: text('question').notNull(),
+  answer: text('answer').notNull(),
+  createdAt: varchar('createdAt').notNull(),
+});
+

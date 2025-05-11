@@ -11,12 +11,13 @@ import { useRouter, useParams } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { db } from '@/utils/db';
 import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
 
 function Feedback() {
   const [feedbackList, setFeedbackList] = useState([]);
   const [averageRating, setAverageRating] = useState(null);
   const router = useRouter();
-  const { interviewId } = useParams(); // dynamic route param
+  const { interviewId } = useParams();
 
   useEffect(() => {
     if (interviewId) {
@@ -54,6 +55,48 @@ function Feedback() {
     setAverageRating(avg);
   };
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const usableWidth = pageWidth - 2 * margin;
+
+    doc.setFontSize(18);
+    doc.text("Interview Feedback Report", margin, 20);
+    let yOffset = 30;
+
+    if (averageRating) {
+      doc.setFontSize(12);
+      doc.text(`Overall Rating: ${averageRating}/10`, margin, yOffset);
+      yOffset += 10;
+    }
+
+    feedbackList.forEach((item, index) => {
+      doc.setFontSize(12);
+      const sections = [
+        { label: "Question", content: item.question },
+        { label: "Your Answer", content: item.userAns },
+        { label: "Correct Answer", content: item.correctAns },
+        { label: "Feedback", content: item.feedback },
+        { label: "Rating", content: item.rating }
+      ];
+
+      for (let section of sections) {
+        const wrapped = doc.splitTextToSize(`${section.label}: ${section.content}`, usableWidth);
+        if (yOffset + wrapped.length * 7 > 280) {
+          doc.addPage();
+          yOffset = 20;
+        }
+        doc.text(wrapped, margin, yOffset);
+        yOffset += wrapped.length * 7;
+      }
+
+      yOffset += 5;
+    });
+
+    doc.save(`Interview_Feedback_${interviewId}.pdf`);
+  };
+
   return (
     <div className='p-10'>
       {feedbackList?.length === 0 ? (
@@ -62,7 +105,7 @@ function Feedback() {
         <>
           <h2 className='text-3xl font-bold text-green-500'>Congratulation!</h2>
           <h2 className='font-bold text-2xl'>Here is your interview feedback</h2>
-          
+
           {averageRating && (
             <h2 className='text-blue-500 text-lg my-3'>
               Your overall interview rating: <strong>{averageRating}/10</strong>
@@ -70,7 +113,7 @@ function Feedback() {
           )}
 
           <h2 className='text-sm text-gray-500'>Find below the interview question with correct answer, your answer and feedback for improvement</h2>
-          
+
           {feedbackList.map((item, index) => (
             <Collapsible key={index} className="mt-7">
               <CollapsibleTrigger className="p-2 bg-secondary rounded-lg my-2 text-left flex justify-between gap-7 w-full">
@@ -86,10 +129,13 @@ function Feedback() {
               </CollapsibleContent>
             </Collapsible>
           ))}
+
+          <div className="flex mt-6">
+            <Button onClick={generatePDF}>Download PDF</Button>
+            <Button className="ml-4" onClick={() => router.replace('/dashboard')}>Go Home</Button>
+          </div>
         </>
       )}
-
-      <Button onClick={() => router.replace('/dashboard')}>Go Home</Button>
     </div>
   );
 }
