@@ -16,7 +16,7 @@ import jsPDF from 'jspdf';
 function QAReview() {
   const [qaList, setQaList] = useState([]);
   const router = useRouter();
-  const { jobRole, techStack } = useParams(); // <-- Expecting both in URL like /qa-review/frontend/javascript
+  const { jobRole, techStack } = useParams(); // Expecting /qa-review/frontend/javascript
 
   useEffect(() => {
     if (jobRole && techStack) {
@@ -47,8 +47,8 @@ function QAReview() {
     const margin = 14;
     const usableWidth = pageWidth - 2 * margin;
 
-    doc.setFontSize(18);
-    doc.text(`Interview Q&A for ${jobRole} (${techStack})`, margin, 20);
+    doc.setFontSize(14); // Smaller title font
+    doc.text(`Interview Q&A for ${decodeURIComponent(jobRole)} (${techStack})`, margin, 20);
     let yOffset = 30;
 
     qaList.forEach((item, index) => {
@@ -58,13 +58,14 @@ function QAReview() {
       ];
 
       for (let section of sections) {
+        doc.setFontSize(8); // Smaller content font
         const wrapped = doc.splitTextToSize(`${section.label}: ${section.content}`, usableWidth);
-        if (yOffset + wrapped.length * 7 > 280) {
+        if (yOffset + wrapped.length * 6 > 280) {
           doc.addPage();
           yOffset = 20;
         }
         doc.text(wrapped, margin, yOffset);
-        yOffset += wrapped.length * 7;
+        yOffset += wrapped.length * 6;
       }
 
       yOffset += 5;
@@ -81,7 +82,7 @@ function QAReview() {
         <>
           <h2 className='text-3xl font-bold text-green-500'>All the Best!</h2>
           <h2 className='font-bold text-2xl'>Top Interview Questions & Answers</h2>
-          <h2 className='text-sm text-gray-500 mb-6'>Based on: <strong>{jobRole}</strong> role and <strong>{techStack}</strong> stack</h2>
+          <h2 className='text-sm text-gray-500 mb-6'>Based on: <strong>{decodeURIComponent(jobRole)}</strong> role and <strong>{techStack}</strong> stack</h2>
 
           {qaList.map((item, index) => (
             <Collapsible key={index} className="mt-7">
