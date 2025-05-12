@@ -22,7 +22,7 @@ function Header() {
         </li>
         <li className={`hover:text-neutral-50 hover:font-bold transition-all cursor-pointer
           ${path === '/dashboard/questions/generate-common-questions' && 'text-neutral-50 font-bold'}`}>
-          <Link href={"/dashboard/questions/generate-common-questions"}>Questions</Link>
+          <Link href={"/dashboard/questions/generate-common-questions"}>Practice Questions</Link>
         </li>
 
       </ul>
